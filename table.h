@@ -3,13 +3,16 @@
 
 #include <QObject>
 #include <QVector>
+#include <collection.h>
 #include <queryset.h>
 
 
-#define QOrmModel(table)  class table : public QObject, public Table<table>
+#define QOrmModel(table)  class table : public Table
 
-#define QOrmOrganizer()                                                                     \
-     QOrmModelField(id, "integer PRIMARYKEY AUTO_INCREMENT")                                 \
+#define QOrmOrganizer(table)                                                                 \
+    public:                                                                                  \
+    table& operator=(Queryset* q){ this->exec(q);  return *this;}                            \
+    QOrmModelField(id, "integer PRIMARYKEY AUTO_INCREMENT")                                  \
     QOrmModelField(updated_at, "timestamp NOT_NULL")                                         \
     QOrmModelField(created_at, "timestamp NOT NULL")
 
@@ -29,8 +32,8 @@
     public:                                                                                 \
         Q_PROPERTY(Table* target READ target WRITE set##target)                             \
                                                                                             \
-        target* target##Accessor() const{ return m_##target;}                                    \
-        void set##target(target* fieldname){ m_##target = fieldname;}                  \
+        target* target##Accessor() const{ return m_##target;}                               \
+        void set##target(target* fieldname){ m_##target = fieldname;}                       \
     private:                                                                                \
         target* m_##target;
 
@@ -44,18 +47,18 @@
         target* m_##target;
 
 
-template<class T>
-class Table
+
+class Table : public QObject
 {
 
 public:
-    virtual T& operator=(Queryset* q) {return static_cast<T>(*this);}
 
     Table(){}
-    Queryset* all();
-    Queryset* first();
 
 
+protected:
+    void exec(Queryset*);
+    Collection* collection;
 
 
 };

@@ -34,8 +34,11 @@ MainWindow::MainWindow(QWidget *parent) :
 */
 
     Queryset* q = new Queryset;
-    Patient p1=q;
-    Patient p2=p1.all();
+
+    //Patient p = Patient::all()->first();
+    Patient p1;
+    p1=q;
+    //Patient p2=p1.all();
 
             // Patient* n = p.all()->all();
 

@@ -16,7 +16,8 @@ SOURCES += main.cpp\
     table.cpp \
     patient.cpp \
     qorm.cpp \
-    queryset.cpp
+    queryset.cpp \
+    collection.cpp
 
 HEADERS  += mainwindow.h \
     dataset.h \
@@ -24,6 +25,7 @@ HEADERS  += mainwindow.h \
     qorm.h \
     doctor.h \
     table.h \
-    queryset.h
+    queryset.h \
+    collection.h
 
 FORMS    += mainwindow.ui

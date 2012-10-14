@@ -13,3 +13,16 @@ Table<T>::Table()
 
 
 
+
+void Table::exec(Queryset* q)
+{
+    if(collection->qset == q)
+        return;
+    else
+    {
+
+    }
+
+}
+
+
