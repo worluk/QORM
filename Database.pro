@@ -37,7 +37,7 @@ TABLES += tables/doctor.h \
 
 
 TableBuild.output = ./tables/tbl_${QMAKE_FILE_BASE}.h
-TableBuild.commands =  c:/QtSDK/mingw/bin/mingw32-gcc.exe -P -E -include QtCore/qobject.h -I C:/QtSDK/Desktop/Qt/4.8.0/mingw/include ${QMAKE_FILE_NAME} -o ${QMAKE_FILE_OUT}
+TableBuild.commands =  d:/QtSDK/mingw/bin/mingw32-gcc.exe -P -E  -I d:/QtSDK/Desktop/Qt/4.8.0/mingw/include ${QMAKE_FILE_NAME} -o ${QMAKE_FILE_OUT}# -include QtCore/qobject.h
 TableBuild.input = TABLES
 TableBuild.variable_out = HEADERS
 QMAKE_EXTRA_COMPILERS += TableBuild

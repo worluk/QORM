@@ -3,6 +3,8 @@
 
 #include "../macros.h"
 
+
+
 #define DoctorAccessor doctor
 
 QOrmModel(Doctor)
