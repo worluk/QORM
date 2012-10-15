@@ -1,7 +1,7 @@
 #ifndef DOCTOR_H
 #define DOCTOR_H
 
-#include <table.h>
+#include "../macros.h"
 
 #define DoctorAccessor doctor
 

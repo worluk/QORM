@@ -1,7 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QDebug>
 #include <qorm.h>
-#include <patient.h>
+#include <tables/tbl_patient.h>
 
 
 
@@ -33,11 +34,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
 */
 
-    Queryset* q = new Queryset;
+
 
     //Patient p = Patient::all()->first();
-    Patient p1;
-    p1=q;
+    Queryset* q = Patient::all();
+    Patient p;
+   //qDebug() << q->getQuery();
+    //qDebug() << p.metaObject()->className();
+
     //Patient p2=p1.all();
 
             // Patient* n = p.all()->all();
