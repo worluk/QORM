@@ -2,7 +2,8 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 #include <qorm.h>
-#include <tables/tbl_patient.h>
+#include "tbl_patient.h"
+#include "tbl_doctor.h"
 
 
 
@@ -12,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
- /*   Gorm* db = new Gorm("QSQLITE");
+    Qorm* db = new Qorm("QSQLITE");
 
     db->setDatabaseName("test.db");
 
@@ -21,25 +22,19 @@ MainWindow::MainWindow(QWidget *parent) :
     db->registerTable<Patient>();
     db->registerTable<Doctor>();
 
-    //tables["Patient"]->all();
-   /// tables["Doctor"]->all();
+   /* Patient::find(0)->name();
 
-   // Patient* p = table("Patient")->first();
-   // BaseTable<int> t;
-*/
- /*   Patient p;
-    Patient* n = p.all()->all();
-    Doctor* d = n->first()->doctor();
-    QString s = d->name();
-
-*/
-
-
+    Patient n = Patient::first();*/
+    Patient p;
+    //qDebug() << p.find(0)->name();
+    //qDebug() << p.find<Patient>(0)->vorname();
 
     //Patient p = Patient::all()->first();
-    Queryset* q = Patient::all();
-    Patient p;
-   //qDebug() << q->getQuery();
+    //Queryset* q = Patient::all();
+
+
+
+    //qDebug() << q->getQuery();
     //qDebug() << p.metaObject()->className();
 
     //Patient p2=p1.all();

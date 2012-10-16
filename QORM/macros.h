@@ -9,8 +9,8 @@
     public:                                                                                  \
     table& operator=(Queryset* q){ this->exec(q);  return *this;}                            \
     QOrmModelField(id, "integer PRIMARYKEY AUTO_INCREMENT")                                  \
-    QOrmModelField(updated_at, "timestamp NOT_NULL")                                         \
-    QOrmModelField(created_at, "timestamp NOT NULL")
+    QOrmModelField(updated_at, "varchar(25) NOT_NULL")                                         \
+    QOrmModelField(created_at, "varchar(25) NOT NULL")
 
 
 
