@@ -54,6 +54,7 @@ template<class T> void Qorm::registerTable()
             qDebug() << "Error when creating table " << name;
     }
 
+    delete model;
 }
 
 

@@ -4,21 +4,22 @@
 #include <QObject>
 #include <QVector>
 #include <QDebug>
+#include <QString>
+#include <QStringList>
+#include <QMetaClassInfo>
 #include <collection.h>
 #include <queryset.h>
+#include <stdarg.h>
 
-
-class Table : public QObject
+class Table : public Queryset
 {
 public:
-
-    Table(){}
-    static Queryset* all();
+    Table() : Queryset(){}
+    Table(QString s) : Queryset(s){}
     bool create();
 
 
 protected:
-    void exec(Queryset*);
     Collection* collection;
 
 

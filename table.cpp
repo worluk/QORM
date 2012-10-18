@@ -5,22 +5,9 @@
 
 
 
-void Table::exec(Queryset* q)
-{
-    if(collection->qset == q)
-        return;
-    else
-    {
-
-    }
-
-}
 
 
-Queryset* Table::all()
-{
-    return new Queryset(QString("SELECT * from ") + QString(staticMetaObject.className()) + QString(";"));
-}
+
 
 bool Table::create()
 {
@@ -46,6 +33,7 @@ bool Table::create()
     if(!q.exec(createQuery))
     {
         qDebug() << "Creating table " << name << "failed";
+        qDebug() << q.lastQuery();
         return false;
     }
     return q.exec(QString("INSERT INTO QORM_MASTER values('") + name + QString("',datetime(),datetime(), 1)"));
