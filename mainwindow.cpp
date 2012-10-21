@@ -23,9 +23,20 @@ MainWindow::MainWindow(QWidget *parent) :
     db->registerTable<Doctor>();
 
 
-    //Patient p =
-    Patient::build("Tobias","Engel");
-   // p.save();
+
+    Patient* n = Patient::build("Tobias","Engel");
+    n->save();
+
+    qDebug() << n->vorname() << n->name();
+
+    //returns a collection<Patient>
+   // Collection<Patient> p = Patient::all()->find(QString("name like 'blub'"));
+   // Collection <Patient>* p = Patient::all();
+
+    Collection<Patient>* patients = Patient::all();
+    Patient* p = Patient::all()->find(0);
+
+    Patient::all()->find(QString("name like 'blub'"));
 
     Patient::all()->find(0)->debugQuery();
     Patient::all()->first()->debugQuery();

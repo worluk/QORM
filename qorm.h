@@ -8,9 +8,6 @@
 #include <QDebug>
 #include <table.h>
 
-
-//extern QMap<QString, Table> tables;
-
 class Qorm : public QObject
 {
     Q_OBJECT
@@ -34,10 +31,6 @@ template<class T> void Qorm::registerTable()
 
     //get the class name
     const QString name = model->metaObject()->className();
-
-    //add the table to the tables map
- //   if (!tables.contains(name))
- //     tables.insert(name, (model));
 
     QSqlQuery q;
     //check if the table is existing

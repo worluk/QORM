@@ -17,17 +17,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    dataset.cpp \
     table.cpp \
-    qorm.cpp \
-    queryset.cpp \
-    collection.cpp
+    qorm.cpp
 
 HEADERS  += mainwindow.h \
-    dataset.h \
     qorm.h \
     table.h \
-    queryset.h \
     collection.h
 
 FORMS    += mainwindow.ui

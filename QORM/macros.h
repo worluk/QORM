@@ -7,32 +7,39 @@
 #define QOrmOrganizer(table)                                                                 						\
     Q_OBJECT                                                                                 						\
     public:                                                                                  						\
-	table() : Table(){}																										\
+	table() : Table(){}																								\
 	table(QString s) : Table(s){}																					\
-	table& operator=(Queryset* q){exec(); return *this;}                            										\
-	static table* all(){return new table(QString("SELECT * FROM ") + QString(staticMetaObject.className()));} 		\
-	table* find(int i){return (table*)Table::find(i);}																\
-	table* find(QString s){return (table*)Table::find(s);}															\
-	table* find(QString s, int i){return (table*)Table::find(s, i);}												\
-	table* find(QString s, QString v){return (table*)Table::find(s, v);}											\
-	table* first() {return (table*)Table::first();}																	\
-	table* last() {return (table*)Table::last();}																	\
-	table* limit(int i) {return (table*)Table::limit(i);}															\
-	table* limit(int i, int l) {return (table*)Table::limit(i,l);}													\
-	table* order(QString s, QORM_DIRECTION d = Q_ASC) {return (table*)Table::order(s,d);}							\
-    QOrmModelField(id, "integer PRIMARYKEY AUTO_INCREMENT")                                  						\
+	table* operator=(Table* q){q->exec(); return this;} \
+	static Collection<table>* all(){return new Collection<table>(QString("SELECT * FROM ") + QString(staticMetaObject.className()));} 		\
+    int getLastID(){QSqlQuery q; q.exec("SELECT seq FROM sqlite_sequence where name ='table'"); q.first();return q.value(0).toInt();}	\
+	QOrmModelField(id, "integer PRIMARY KEY AUTOINCREMENT")                                  						\
     QOrmModelField(updated_at, "varchar(25) NOT NULL")                                         						\
     QOrmModelField(created_at, "varchar(25) NOT NULL")																\
-	public: \
-	static table* doBuild(int count, ... ){ va_list parameters; va_start(parameters, count); QStringList fields, values;		\
-    for(int i = 0;i < count; i++ ){																					\
-        fields << staticMetaObject.classInfo(i+3).name();																\
-        values << QString("'") + QString(va_arg(parameters, char*)) + QString("'");									\
-    }																												\
-    va_end(parameters);																								\
-    return (table*)(insert(staticMetaObject.className(), fields, values));							\
-}
-
+	public: 																										\
+		static table* doBuild(int count, ... ){ va_list parameters; va_start(parameters, count); QStringList fields, values;		\
+		fields << staticMetaObject.classInfo(1).name();																	\
+		values << QString("datetime()");																				\
+		fields << staticMetaObject.classInfo(2).name();																	\
+		values << QString("datetime()");																				\
+		for(int i = 0;i < count; i++ ){																					\
+			fields << staticMetaObject.classInfo(i+3).name();															\
+			values << QString("'") + QString(va_arg(parameters, char*)) + QString("'");									\
+		}																												\
+		va_end(parameters);																								\
+		return (table*)(setup(staticMetaObject.className(), fields, values));											\
+		}																												\
+		static table* doCreate(int count, ... ){ va_list parameters; va_start(parameters, count); QStringList fields, values;		\
+		fields << staticMetaObject.classInfo(1).name();																	\
+		values << QString("datetime()");																				\
+		fields << staticMetaObject.classInfo(2).name();																	\
+		values << QString("datetime()");																				\
+		for(int i = 0;i < count; i++ ){																					\
+			fields << staticMetaObject.classInfo(i+3).name();															\
+			values << QString("'") + QString(va_arg(parameters, char*)) + QString("'");									\
+		}																												\
+		va_end(parameters);																								\
+		return (table*)(insert(staticMetaObject.className(), fields, values));							\
+		}
 
 
 

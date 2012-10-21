@@ -4,11 +4,6 @@
 #include "table.h"
 
 
-
-
-
-
-
 bool Table::create()
 {
     QString name = this->metaObject()->className();
@@ -40,3 +35,77 @@ bool Table::create()
 
 
 }
+
+Table::Table()
+{
+    bRecordNew = true;
+    bRecordChanged = false;
+}
+
+
+void Table::save()
+{
+    if(bRecordNew)
+    {
+
+    }
+}
+
+Table* Table::setup(QString name, QStringList fields, QStringList values)
+{
+    QString insertQuery;
+
+    insertQuery = QString("INSERT INTO ") + name + QString("(");
+    insertQuery += fields.join(",");
+    insertQuery += ") values (";
+    insertQuery += values.join(",");
+    insertQuery += ")";
+
+    Table* t = (new Table(insertQuery))->exec();
+    m_id = getLastID();
+    t->reload();
+    return t;
+}
+
+
+Table* Table::insert(QString name, QStringList fields, QStringList values)
+{
+    QString insertQuery;
+
+    insertQuery = QString("INSERT INTO ") + name + QString("(");
+    insertQuery += fields.join(",");
+    insertQuery += ") values (";
+    insertQuery += values.join(",");
+    insertQuery += ")";
+    Table* t = (new Table(insertQuery))->exec();
+    m_id = getLastID();
+    t->reload();
+    return t;
+}
+
+
+
+
+Table*  Table::exec()
+{
+   QSqlQuery q;
+   qDebug() << query;
+   qDebug() << "Succeeded:" << q.exec(query);
+
+
+   return this;
+}
+
+
+bool Table::reload()
+{
+    QSqlQuery q;
+    q.exec("SELECT ")
+}
+
+int count_arguments(QString s)
+{
+    QStringList l = s.split(",");
+    return l.count();
+}
+
