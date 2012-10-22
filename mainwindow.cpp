@@ -22,10 +22,12 @@ MainWindow::MainWindow(QWidget *parent) :
     db->registerTable<Patient>();
     db->registerTable<Doctor>();
 
+//    Patient* t = new Patient;
+//    t->setid(QString("3"));
+//    qDebug() << t->setProperty("id","4");
+//    //qDebug() << t->id();
 
-
-    Patient* n = Patient::build("Tobias","Engel");
-    n->save();
+    Patient* n = Patient::generate("Engel","Tobias");
 
     qDebug() << n->vorname() << n->name();
 
@@ -49,7 +51,6 @@ MainWindow::MainWindow(QWidget *parent) :
     Patient::all()->order(QString("name"))->debugQuery();
     Patient::all()->order(QString("vorname"), Q_DESC)->debugQuery();
     Patient::all()->find(QString("name"), "Test")->limit(3)->order(QString("vorname"))->debugQuery();
-
    // Patient::all()  //collection
 
 }

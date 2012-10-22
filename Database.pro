@@ -17,7 +17,6 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    table.cpp \
     qorm.cpp
 
 HEADERS  += mainwindow.h \

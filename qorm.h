@@ -8,6 +8,8 @@
 #include <QDebug>
 #include <table.h>
 
+int count_arguments(QString s);
+
 class Qorm : public QObject
 {
     Q_OBJECT
@@ -26,11 +28,8 @@ protected:
 
 template<class T> void Qorm::registerTable()
 {
-    //create the new table
-    T* model = new T;
-
     //get the class name
-    const QString name = model->metaObject()->className();
+    const QString name = T::staticMetaObject.className();
 
     QSqlQuery q;
     //check if the table is existing
@@ -43,11 +42,9 @@ template<class T> void Qorm::registerTable()
 
         qDebug() << "Table" << name << "not found.";
 
-        if(!model->create())
+        if(!T::create())
             qDebug() << "Error when creating table " << name;
     }
-
-    delete model;
 }
 
 

@@ -1,8 +1,6 @@
 #include <qorm.h>
 
 
-//QMap<QString, Table> tables = QMap<QString, Table>();
-
 Qorm::Qorm(QString driver)
 {
     db = QSqlDatabase::addDatabase(driver);
@@ -53,4 +51,10 @@ bool Qorm::open()
     }
     else
         return false;
+}
+
+int count_arguments(QString s)
+{
+    QStringList l = s.split(",");
+    return l.count();
 }
