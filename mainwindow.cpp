@@ -5,7 +5,7 @@
 #include "tbl_patient.h"
 #include "tbl_doctor.h"
 
-
+#include <QThread>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -22,18 +22,21 @@ MainWindow::MainWindow(QWidget *parent) :
     db->registerTable<Patient>();
     db->registerTable<Doctor>();
 
-//    Patient* t = new Patient;
-//    t->setid(QString("3"));
-//    qDebug() << t->setProperty("id","4");
-//    //qDebug() << t->id();
+    Patient* n = Patient::build("Engel","Tobias");
+    n->save();
 
-    Patient* n = Patient::generate("Engel","Tobias");
+    n->destroy();
 
-    qDebug() << n->vorname() << n->name();
+    Patient* g = Patient::build("Testor", "Elmo");
+    g->setname("Blub");
+    g->save();
 
-    //returns a collection<Patient>
-   // Collection<Patient> p = Patient::all()->find(QString("name like 'blub'"));
-   // Collection <Patient>* p = Patient::all();
+
+    g->setname("Elmo");
+    g->save();
+
+    qDebug() << g->name();
+
 
     Collection<Patient>* patients = Patient::all();
     Patient* p = Patient::all()->find(0);

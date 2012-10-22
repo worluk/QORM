@@ -28,11 +28,14 @@ public:
     T* operator=(T* q){q->exec(); return this;}
 
     bool save();
+    void destroy();
 
     static Collection<T>* all(){return new Collection<T>(QString("SELECT * FROM ") + QString(T::staticMetaObject.className()));}
     static T* doBuild(int count, ... );
     static T* doCreate(int count, ... );
     static bool create();
+
+
 
     void debugQuery(){ qDebug() << query; }
 
@@ -93,21 +96,42 @@ Table<T>::Table()
 }
 
 template<class T>
+void Table<T>::destroy()
+{
+
+    QString whereString = query.mid(query.indexOf("WHERE"));
+    QString s = QString("DELETE FROM ") + T::staticMetaObject.className() + QString(" ") + whereString;
+    qDebug() << s;
+
+    QSqlQuery q;
+    q.exec(s);
+    delete this;
+
+}
+
+template<class T>
 bool Table<T>::save()
 {
     QStringList fields, values;
     QSqlQuery q;
     QString s = QString("SELECT * FROM ") + T::staticMetaObject.className() + QString(" WHERE id='") + ((T*)this)->id() + QString("'");
-    q.exec();
-    if(q.size())
+    qDebug() << "check query" << s;
+    bool ret = q.exec(s);
+    bool exists = q.next();
+    qDebug() << ret << exists;
+
+    if(ret && exists)
     {
+        QString name;
         //UPDATE
         s = QString("UPDATE ") + T::staticMetaObject.className() + QString(" SET ");
 
         fields << "updated_at=datetime()";
-        for(int i = 0;i < T::staticMetaObject.classInfoCount()-2; i++ )
-             fields << T::staticMetaObject.classInfo(i+2).name() + " ='" + T::staticMetaObject.classInfo(i+2).value() + "'";
-
+        for(int i = 3;i < T::staticMetaObject.classInfoCount(); i++ )
+        {
+            name = T::staticMetaObject.classInfo(i).name();
+            fields << name + QString(" ='") + ((T*)this)->property(name.toStdString().c_str()).toString()  + QString("'");
+        }
          s += fields.join(",");
         s+= QString(" WHERE id = '") + ((T*)this)->id() + QString("'");
         qDebug() << s;
@@ -115,13 +139,19 @@ bool Table<T>::save()
     }
     else
     {
+        QString name;
         //INSERT
         s = QString("INSERT INTO ") + T::staticMetaObject.className() + QString("(");
 
-        for(int i = 0;i < T::staticMetaObject.classInfoCount(); i++ )
+        fields << T::staticMetaObject.classInfo(1).name();
+        values << QString("datetime()");
+        fields << T::staticMetaObject.classInfo(2).name();
+        values << QString("datetime()");
+        for(int i = 3;i < T::staticMetaObject.classInfoCount(); i++ )
         {
-            fields << T::staticMetaObject.classInfo().name();
-            values << T::staticMetaObject.classInfo().value();
+            name = T::staticMetaObject.classInfo(i).name();
+            fields << name;
+            values << QString("'")+((T*)this)->property(name.toStdString().c_str()).toString()+QString("'");
         }
 
         s += fields.join(",");
@@ -129,7 +159,7 @@ bool Table<T>::save()
         s += values.join(",");
         s += ")";
         qDebug() << s;
-        q.exec(s);
+        qDebug() << "Success:" << q.exec(s);
         QString idquery = QString("SELECT seq FROM sqlite_sequence WHERE name ='") + T::staticMetaObject.className() + QString("'");
         q.exec(idquery);
         q.first();
@@ -137,7 +167,8 @@ bool Table<T>::save()
         m_id = dataid;
         reload();
     }
-
+    query = QString("SELECT * FROM ") + T::staticMetaObject.className() + QString(" WHERE id='") + QString::number(dataid) + QString("'");
+    qDebug() << "query:" << query;
     return true;
 }
 
@@ -184,18 +215,21 @@ T* Table<T>::doBuild(int count, ... )
     values << QString("datetime()");
     for(int i = 0;i < count; i++ ){
         fields << T::staticMetaObject.classInfo(i+3).name();
-        values << QString("'") + QString(va_arg(parameters, char*)) + QString("'");
+        values << QString(va_arg(parameters, char*));
     }
     va_end(parameters);
-    QString insertQuery;
 
-    insertQuery = QString("INSERT INTO ") + T::staticMetaObject.className() + QString("(");
-    insertQuery += fields.join(",");
-    insertQuery += ") values (";
-    insertQuery += values.join(",");
-    insertQuery += ")";
 
-    T* t = new T(insertQuery);
+    bool r = true;
+    T* t = new T;
+    for(int i = 1;i < T::staticMetaObject.classInfoCount()-1; i++ )
+        r |= t->setProperty(fields[i].toStdString().c_str(), values[i]);
+
+    if(!r)
+        qDebug() << "error";
+
+
+
     return t;
 }
 
