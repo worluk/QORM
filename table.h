@@ -8,6 +8,9 @@
 #include <QSqlRecord>
 #include <QString>
 #include <QStringList>
+#include <QDate>
+#include <QDateTime>
+#include <QTime>
 #include <QMetaClassInfo>
 #include <stdarg.h>
 #include <collection.h>
@@ -25,12 +28,12 @@ public:
     Table(QString q){query = q;}
 
     bool operator==(Table* p){return query==p->getQuery();}
-    T* operator=(T* q){q->exec(); return this;}
+    T* operator=(T* q);
 
     bool save();
     void destroy();
 
-    static Collection<T>* all(){return new Collection<T>(QString("SELECT * FROM ") + QString(T::staticMetaObject.className()));}
+    static Collection<T> all(){return *(new Collection<T>(QString("SELECT * FROM ") + QString(T::staticMetaObject.className())));}
     static T* doBuild(int count, ... );
     static T* doCreate(int count, ... );
     static bool create();
@@ -43,8 +46,9 @@ public:
 
     int dataid;
     int m_id;
-protected:
     T* exec();
+protected:
+
 
 
     QString query;
@@ -89,10 +93,20 @@ bool Table<T>::create()
 }
 
 template<class T>
+T* Table<T>::operator=(T* q)
+{
+    q->exec();
+    return this;
+}
+
+template<class T>
 Table<T>::Table()
 {
     bRecordNew = true;
     bRecordChanged = false;
+    m_id = 0;
+    dataid = 0;
+
 }
 
 template<class T>
@@ -105,7 +119,7 @@ void Table<T>::destroy()
 
     QSqlQuery q;
     q.exec(s);
-    delete this;
+    delete static_cast<T*>(this);
 
 }
 
@@ -114,11 +128,11 @@ bool Table<T>::save()
 {
     QStringList fields, values;
     QSqlQuery q;
-    QString s = QString("SELECT * FROM ") + T::staticMetaObject.className() + QString(" WHERE id='") + ((T*)this)->id() + QString("'");
-    qDebug() << "check query" << s;
+    QString s = QString("SELECT * FROM ") + T::staticMetaObject.className() + QString(" WHERE id='") +  QString::number(((T*)this)->id()) + QString("'");
+    qDebug() << s;
     bool ret = q.exec(s);
     bool exists = q.next();
-    qDebug() << ret << exists;
+
 
     if(ret && exists)
     {
@@ -133,7 +147,7 @@ bool Table<T>::save()
             fields << name + QString(" ='") + ((T*)this)->property(name.toStdString().c_str()).toString()  + QString("'");
         }
          s += fields.join(",");
-        s+= QString(" WHERE id = '") + ((T*)this)->id() + QString("'");
+        s+= QString(" WHERE id = '") + QString::number(((T*)this)->id()) + QString("'");
         qDebug() << s;
         q.exec(s);
     }
@@ -160,12 +174,15 @@ bool Table<T>::save()
         s += ")";
         qDebug() << s;
         qDebug() << "Success:" << q.exec(s);
-        QString idquery = QString("SELECT seq FROM sqlite_sequence WHERE name ='") + T::staticMetaObject.className() + QString("'");
+        QString idquery = QString("SELECT * FROM ") + T::staticMetaObject.className() + QString(" ORDER BY id DESC LIMIT 1");
+                //QString("SELECT seq FROM sqlite_sequence WHERE name ='") + T::staticMetaObject.className() + QString("'");
         q.exec(idquery);
         q.first();
         dataid = q.value(0).toInt();
-        m_id = dataid;
-        reload();
+        ((T*)this)->setid(dataid);
+        ((T*)this)->setupdated_at( q.value(2).toDateTime());
+        ((T*)this)->setcreated_at(q.value(1).toDateTime());
+        //reload();
     }
     query = QString("SELECT * FROM ") + T::staticMetaObject.className() + QString(" WHERE id='") + QString::number(dataid) + QString("'");
     qDebug() << "query:" << query;
@@ -175,12 +192,20 @@ bool Table<T>::save()
 template<class T>
 T* Table<T>::exec()
 {
+    QSqlRecord rec;
+    T* item = (T*)this;
    QSqlQuery q;
    qDebug() << query;
    qDebug() << "Succeeded:" << q.exec(query);
 
+   q.first();
+   rec = q.record();
 
-   return (T*)this;
+   for(int i = 0;i < T::staticMetaObject.classInfoCount(); i++ )
+       item->setProperty(rec.fieldName(i).toStdString().c_str(), rec.value(i).toString());
+
+
+   return item;
 }
 
 template<class T>
@@ -213,8 +238,8 @@ T* Table<T>::doBuild(int count, ... )
     values << QString("datetime()");
     fields << T::staticMetaObject.classInfo(2).name();
     values << QString("datetime()");
-    for(int i = 0;i < count; i++ ){
-        fields << T::staticMetaObject.classInfo(i+3).name();
+    for(int i = 3;i < count+3; i++ ){
+        fields << T::staticMetaObject.classInfo(i).name();
         values << QString(va_arg(parameters, char*));
     }
     va_end(parameters);
@@ -222,7 +247,8 @@ T* Table<T>::doBuild(int count, ... )
 
     bool r = true;
     T* t = new T;
-    for(int i = 1;i < T::staticMetaObject.classInfoCount()-1; i++ )
+     t->setProperty("id", 0);
+    for(int i = 0;i < count+2; i++ )
         r |= t->setProperty(fields[i].toStdString().c_str(), values[i]);
 
     if(!r)

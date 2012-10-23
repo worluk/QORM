@@ -1,7 +1,9 @@
 #ifndef COLLECTION_H
 #define COLLECTION_H
 
-
+#include <QSqlQuery>
+#include <QSqlRecord>
+#include <QVector>
 
 enum QORM_DIRECTION
 {
@@ -14,8 +16,10 @@ class Collection
 {
 public:
 
-    T operator[](int index){return data[index];}
-    Collection<T> operator=(Collection<T>*){return *this;}
+    T* operator[](int index){return data[index];}
+    T* at(int index){return data[index];}
+    Collection<T> operator=(const Collection<T>&);
+    Collection(){query = "";}
     Collection(QString s){query = s;}
 
     Collection<T>* find(QString);
@@ -30,14 +34,45 @@ public:
     T* last();
     T* find(int);
 
+    int length(){return data.size();}
+
     void debugQuery(){ qDebug() << query; }
 
 protected:
     QVector<T*> data;
     QString query;
+    Collection<T>* exec();
 
 };
 
+template<class T>
+Collection<T>* Collection<T>::exec()
+{
+    T* item;
+    data.clear();
+    QSqlQuery q(query);
+    QSqlRecord rec;
+    QString data_query;
+    while (q.next())
+    {
+        data_query = QString("SELECT * FROM ") + T::staticMetaObject.className() + QString(" WHERE id='") + q.record().value("id").toString() + QString("'");
+        item = new T(data_query);
+
+        rec = q.record();
+
+        for(int i = 0;i < T::staticMetaObject.classInfoCount(); i++ )
+            item->setProperty(rec.fieldName(i).toStdString().c_str(), rec.value(i).toString());
+
+    }
+    return this;
+}
+
+template<class T>
+Collection<T> Collection<T>::operator=(const Collection<T>& n)
+{
+    qDebug() << "yo";
+    return *(n.exec());
+}
 
 template<class T>
 Collection<T>* Collection<T>::find(QString w)
@@ -90,22 +125,25 @@ Collection<T>* Collection<T>::order(QString field, QORM_DIRECTION direction)
 template<class T>
 T* Collection<T>::find(int i)
 {
+    T* item;
     query += QString(" WHERE id='") + QString::number(i) + QString("'");
-    return new T(query);
+    item = new T(query);
+
+    return item->exec();
 }
 
 template<class T>
 T* Collection<T>::first()
 {
     query += QString(" LIMIT 1") ;
-    return new T(query);
+    return (new T(query))->exec();
 }
 
 template<class T>
 T* Collection<T>::last()
 {
     query += QString(" LIMIT 1 DESC") ;
-    return new T(query);
+    return (new T(query))->exec();
 }
 
 

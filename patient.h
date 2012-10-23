@@ -1,8 +1,8 @@
 QOrmModel(Patient)
 {
     QOrmOrganizer(Patient)
-    QOrmModelField(name, "varchar(255)")
-	QOrmModelField(vorname, "varchar(255)")
+    QOrmModelField(name, QString, )
+	QOrmModelField(vorname, QString, )
    // QOrmModelBelongsTo(Doctor)
 
 

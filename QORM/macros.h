@@ -9,23 +9,23 @@
     public:                                                                                 <crlf>\
 	table() : Table<table>(){}																<crlf>\
 	table(QString s) : Table<table>(s){}													<crlf>\
-	QOrmModelField(id, "integer PRIMARY KEY AUTOINCREMENT")                                 <crlf>\
-	QOrmModelField(created_at, "varchar(25) NOT NULL")										<crlf>\
-    QOrmModelField(updated_at, "varchar(25) NOT NULL")                                      <crlf>
+	QOrmModelField(id, int, QORM_PK QORM_AI)                            				<crlf>\
+	QOrmModelField(created_at, QDateTime, QORM_NOTNULL)									<crlf>\
+    QOrmModelField(updated_at, QDateTime, QORM_NOTNULL)                                	<crlf>
 
 
 
-#define QOrmModelField(fieldname, type)                                                     \
+#define QOrmModelField(fieldname, type, options)                                                  \
     public:                                                                                 <crlf>\
-        Q_PROPERTY(QString fieldname READ fieldname WRITE set##fieldname)     				<crlf>\
-        Q_CLASSINFO(#fieldname, type)                                                       <crlf>\
-        QString fieldname() const{ return m_##fieldname;}                                   <crlf>\
-        void set##fieldname(const QString &fieldname){ m_##fieldname = fieldname;}          <crlf>\
+        Q_PROPERTY(type fieldname READ fieldname WRITE set##fieldname)     				<crlf>\
+        Q_CLASSINFO(#fieldname, #type#options)                                              <crlf>\
+        type fieldname() const{ return m_##fieldname;}                                   <crlf>\
+        void set##fieldname(const type &fieldname){ m_##fieldname = fieldname;}          <crlf>\
     private:                                                                                <crlf>\
-        QString m_##fieldname;																<crlf>
+        type m_##fieldname;																<crlf>
 
 #define QOrmModelBelongsTo(target)                                                          \
-        QOrmModelField(target##_id, "integer")                                              <crlf>\
+        QOrmModelField(target##_id, int,)	                                              <crlf>\
     public:                                                                                 <crlf>\
         Q_PROPERTY(Table* target READ target WRITE set##target)                             <crlf>\
                                                                                             <crlf>\

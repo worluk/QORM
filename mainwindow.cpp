@@ -5,7 +5,7 @@
 #include "tbl_patient.h"
 #include "tbl_doctor.h"
 
-#include <QThread>
+#include <QDateTime>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     db->registerTable<Patient>();
     db->registerTable<Doctor>();
 
-    Patient* n = Patient::build("Engel","Tobias");
+   /* Patient* n = Patient::build("Engel","Tobias");
     n->save();
 
     n->destroy();
@@ -31,15 +31,22 @@ MainWindow::MainWindow(QWidget *parent) :
     g->setname("Blub");
     g->save();
 
+    Patient* s = Patient::all()->find(25);
+    qDebug() << s->name() << s->vorname();
 
     g->setname("Elmo");
     g->save();
 
+    qDebug() << "updated_at" << g->updated_at();
     qDebug() << g->name();
 
+*/
+    Collection<Patient> patients;//=Patient::all();
+    patients=Patient::all();
 
-    Collection<Patient>* patients = Patient::all();
-    Patient* p = Patient::all()->find(0);
+    for(int i=0; i<patients.length();i++)
+        qDebug() << patients[i]->name() << patients[i]->vorname();
+  /*  Patient* p = Patient::all()->find(0);
 
     Patient::all()->find(QString("name like 'blub'"));
 
@@ -55,7 +62,7 @@ MainWindow::MainWindow(QWidget *parent) :
     Patient::all()->order(QString("vorname"), Q_DESC)->debugQuery();
     Patient::all()->find(QString("name"), "Test")->limit(3)->order(QString("vorname"))->debugQuery();
    // Patient::all()  //collection
-
+*/
 }
 
 MainWindow::~MainWindow()
