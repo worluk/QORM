@@ -18,7 +18,7 @@ public:
 
     T* operator[](int index){return data[index];}
     T* at(int index){return data[index];}
-    Collection<T> operator=(const Collection<T>&);
+    Collection<T> operator=(Collection<T>*);
     Collection(){query = "";}
     Collection(QString s){query = s;}
 
@@ -41,12 +41,12 @@ public:
 protected:
     QVector<T*> data;
     QString query;
-    Collection<T>* exec();
+    bool exec();
 
 };
 
 template<class T>
-Collection<T>* Collection<T>::exec()
+bool Collection<T>::exec()
 {
     T* item;
     data.clear();
@@ -62,16 +62,19 @@ Collection<T>* Collection<T>::exec()
 
         for(int i = 0;i < T::staticMetaObject.classInfoCount(); i++ )
             item->setProperty(rec.fieldName(i).toStdString().c_str(), rec.value(i).toString());
+        data.append(item);
 
     }
-    return this;
+    return true;
 }
 
 template<class T>
-Collection<T> Collection<T>::operator=(const Collection<T>& n)
+Collection<T> Collection<T>::operator=(Collection<T>* n)
 {
-    qDebug() << "yo";
-    return *(n.exec());
+    n->exec();
+    this->data = n->data;
+    this->query = n->query;
+    return *n;
 }
 
 template<class T>

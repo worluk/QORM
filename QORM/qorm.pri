@@ -11,10 +11,15 @@ TableBuild.CONFIG = no_link
 TableBuild.variable_out = NEW_HEADERS
 
 TablePrepare.output = ./QORM/${QMAKE_FILE_BASE}.pretbl
-TablePrepare.commands =  $$QMAKE_CXX -P -E ${QMAKE_FILE_NAME} -include ./QORM/macros.h | sed \"s/<crlf>/°/g\" | tr \"°\" \"\\012\" > ${QMAKE_FILE_OUT}
+TablePrepare.commands =  $$QMAKE_CXX -P -E ${QMAKE_FILE_NAME} -include ./QORM/macros.h | sed \'s/QORMDependsOn(\\(.*\\))/$${LITERAL_HASH}include \"tbl_\\1.h\"/g\' | sed \"s/<crlf>/°/g\" | tr \"°\" \"\\012\" > ${QMAKE_FILE_OUT}
 TablePrepare.input = TABLES
 TablePrepare.CONFIG = no_link
 TablePrepare.variable_out = PRE_HEADERS
 
 QMAKE_EXTRA_COMPILERS += TablePrepare TableBuild TableMocHeader 
 
+SOURCES += qorm.cpp
+
+HEADERS  += qorm.h \
+    table.h \
+    collection.h

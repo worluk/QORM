@@ -4,8 +4,6 @@
 #
 #-------------------------------------------------
 
-#http://stackoverflow.com/questions/12845513/getting-qmake-to-properly-run-my-code-generator
-
 include(QORM/qorm.pri)
 
 QT       += core gui sql
@@ -16,13 +14,9 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
-    qorm.cpp
+        mainwindow.cpp
 
-HEADERS  += mainwindow.h \
-    qorm.h \
-    table.h \
-    collection.h
+HEADERS  += mainwindow.h
 
 FORMS    += mainwindow.ui
 

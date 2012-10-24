@@ -1,6 +1,8 @@
 #ifndef MACROS_H
 #define MACROS_H
 
+
+
 #define QOrmModel(table)  \
     class table : public QObject, public Table<table>
 
@@ -18,24 +20,22 @@
 #define QOrmModelField(fieldname, type, options)                                                  \
     public:                                                                                 <crlf>\
         Q_PROPERTY(type fieldname READ fieldname WRITE set##fieldname)     				<crlf>\
-        Q_CLASSINFO(#fieldname, #type#options)                                              <crlf>\
+        Q_CLASSINFO(#fieldname, #type" "#options)                                              <crlf>\
         type fieldname() const{ return m_##fieldname;}                                   <crlf>\
         void set##fieldname(const type &fieldname){ m_##fieldname = fieldname;}          <crlf>\
     private:                                                                                <crlf>\
         type m_##fieldname;																<crlf>
 
-#define QOrmModelBelongsTo(target)                                                          \
+#define QOrmModelBelongsTo(target, accessor)                                                          \
         QOrmModelField(target##_id, int,)	                                              <crlf>\
     public:                                                                                 <crlf>\
-        Q_PROPERTY(Table* target READ target WRITE set##target)                             <crlf>\
-                                                                                            <crlf>\
-        target* target##Accessor() const{ return m_##target;}                               <crlf>\
+        target* accessor() const{ return m_##target;}                               <crlf>\
         void set##target(target* fieldname){ m_##target = fieldname;}                       <crlf>\
     private:                                                                                <crlf>\
         target* m_##target;																	<crlf>
 
 #define QOrmModelHasMany(target)                                                            \
-    Q_PROPERTY(Table* target READ target WRITE set##target)                                 <crlf>\
+    Q_PROPERTY(target* target READ target WRITE set##target)                                 <crlf>\
                                                                                             <crlf>\
     public:                                                                                 <crlf>\
         target* target##Accessor##s() const{ return (target*)m_##target->foreignKeyFor(this);}        <crlf>\

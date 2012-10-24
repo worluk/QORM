@@ -15,6 +15,8 @@
 #include <stdarg.h>
 #include <collection.h>
 
+extern QMap<QString, QString> keywords;
+
 #define build(...) doBuild(count_arguments(#__VA_ARGS__), __VA_ARGS__)
 #define generate(...) doCreate (count_arguments(#__VA_ARGS__), __VA_ARGS__)
 
@@ -33,7 +35,7 @@ public:
     bool save();
     void destroy();
 
-    static Collection<T> all(){return *(new Collection<T>(QString("SELECT * FROM ") + QString(T::staticMetaObject.className())));}
+    static Collection<T>* all(){return (new Collection<T>(QString("SELECT * FROM ") + QString(T::staticMetaObject.className())));}
     static T* doBuild(int count, ... );
     static T* doCreate(int count, ... );
     static bool create();
@@ -70,9 +72,19 @@ bool Table<T>::create()
 
     //TODO: handle conversion between different sql engines for datatypes
 
+
+
     for(int i = 0;i < T::staticMetaObject.classInfoCount(); i++ )
     {
-        fields << QString(T::staticMetaObject.classInfo(i).name()) + " " + QString(T::staticMetaObject.classInfo(i).value());
+        //handling types and keywords
+        QStringList infoValues = QString(T::staticMetaObject.classInfo(i).value()).split(" ");
+        QStringList infoValuesResult;
+        for(int n=0;n<infoValues.count();n++)
+           infoValuesResult << keywords[infoValues[n]];
+
+
+        //build the SQL
+        fields << QString(T::staticMetaObject.classInfo(i).name()) + " " + infoValuesResult.join(" ");
     }
 
     createQuery += fields.join(",");

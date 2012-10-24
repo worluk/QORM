@@ -5,8 +5,6 @@
 #include "tbl_patient.h"
 #include "tbl_doctor.h"
 
-#include <QDateTime>
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -22,9 +20,17 @@ MainWindow::MainWindow(QWidget *parent) :
     db->registerTable<Patient>();
     db->registerTable<Doctor>();
 
-   /* Patient* n = Patient::build("Engel","Tobias");
+  /*  Doctor* d = Doctor::build("Arzt");
+    d->save();
+    Patient* n = Patient::build("Engel","Tobias");
     n->save();
 
+    n->setDoctor(d);
+    n->save();*/
+    Patient* p = Patient::all()->first();
+    qDebug() << p->debugQuery();
+    qDebug() << p->doctor()->name();    //SELECT t1.* FROM Doctor t1 JOIN Patient t2 ON t2.Doctor_id = t1.id where t2.id=1
+/*
     n->destroy();
 
     Patient* g = Patient::build("Testor", "Elmo");
@@ -45,7 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
     patients=Patient::all();
 
     for(int i=0; i<patients.length();i++)
-        qDebug() << patients[i]->name() << patients[i]->vorname();
+        qDebug() << patients[i]->name() << patients[i]->vorname() << patients[i]->created_at();
   /*  Patient* p = Patient::all()->find(0);
 
     Patient::all()->find(QString("name like 'blub'"));

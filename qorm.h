@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <table.h>
 
+extern QMap<QString, QString> keywords;
 int count_arguments(QString s);
 
 class Qorm : public QObject

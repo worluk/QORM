@@ -1,9 +1,20 @@
 #include <qorm.h>
 
+QMap<QString, QString> keywords;
+
 
 Qorm::Qorm(QString driver)
 {
     db = QSqlDatabase::addDatabase(driver);
+    if(driver == "QSQLITE")
+    {
+        keywords["QORM_PK"] = "PRIMARY KEY";
+        keywords["QORM_AI"] = "AUTOINCREMENT";
+        keywords["QORM_NOTNULL"] = "NOT NULL";
+        keywords["int"] = "INTEGER";
+        keywords["QString"] = "VARCHAR(255)";
+        keywords["QDateTime"] = "VARCHAR(25)";
+    }
 }
 
 bool Qorm::setDatabaseName(QString name)
