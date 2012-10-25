@@ -22,24 +22,22 @@
         Q_PROPERTY(type fieldname READ fieldname WRITE set##fieldname)     				<crlf>\
         Q_CLASSINFO(#fieldname, #type" "#options)                                              <crlf>\
         type fieldname() const{ return m_##fieldname;}                                   <crlf>\
-        void set##fieldname(const type &fieldname){ m_##fieldname = fieldname;}          <crlf>\
+        void set##fieldname(const type &fieldname){bRecordChanged=true; m_##fieldname = fieldname;}          <crlf>\
     private:                                                                                <crlf>\
         type m_##fieldname;																<crlf>
 
 #define QOrmModelBelongsTo(target, accessor)                                                          \
         QOrmModelField(target##_id, int,)	                                              <crlf>\
     public:                                                                                 <crlf>\
-        target* accessor() const{ return m_##target;}                               <crlf>\
-        void set##target(target* fieldname){ m_##target = fieldname;}                       <crlf>\
-    private:                                                                                <crlf>\
-        target* m_##target;																	<crlf>
+        target* accessor() { return getForeignObject<target>();}                               <crlf>\
+        void set##target(target* object){setForeignObject<target>(object);}   
 
 #define QOrmModelHasMany(target)                                                            \
     Q_PROPERTY(target* target READ target WRITE set##target)                                 <crlf>\
                                                                                             <crlf>\
     public:                                                                                 <crlf>\
         target* target##Accessor##s() const{ return (target*)m_##target->foreignKeyFor(this);}        <crlf>\
-        void set##target(target* target){ m_##target = target;}                             <crlf>\
+        void set##target(target* target){bRecordChanged=true; m_##target = target;}                             <crlf>\
     private:                                                                                <crlf>\
         target* m_##target;																	<crlf>
 
