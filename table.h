@@ -27,7 +27,8 @@ class Table
 public:
 
     Table();
-    Table(QString q){query = q;}
+    Table(QString q);
+    void initProperties();
 
     bool operator==(Table* p){return query==p->getQuery();}
     T* operator=(T* q);
@@ -40,7 +41,9 @@ public:
     static T* doCreate(int count, ... );
     static bool create();
 
-
+    template<class U> U* getForeignObject();
+    template<class U> void setForeignObject(U* object);
+    template<class U> Collection<U>* getForeignCollection();
 
     void debugQuery(){ qDebug() << query; }
 
@@ -51,15 +54,60 @@ public:
     T* exec();
 protected:
 
-
-
     QString query;
 
-    bool bRecordNew;
     bool bRecordChanged;
 
 
 };
+
+
+template<class T>
+template<class U>
+void Table<T>::setForeignObject(U* object)
+{
+    if(object->id() == 0)
+        object->save();
+
+    QString foreignTable = U::staticMetaObject.className();
+    QString fieldname = foreignTable + QString("_id");
+
+    T* item = (T*)this;
+    item->setProperty(fieldname.toStdString().c_str(), object->id());
+    bRecordChanged =true;
+
+}
+template<class T>
+template<class U>
+U* Table<T>::getForeignObject()
+{
+    //SELECT t1.* FROM Doctor t1 JOIN Patient t2 ON t2.Doctor_id = t1.id where t2.id=1
+    QString foreignTable = U::staticMetaObject.className();
+    QString ownTable = T::staticMetaObject.className();
+    QString fieldname = foreignTable + QString("_id");
+    T* self = (T*)this;
+
+    QString objectQuery = QString("SELECT t1.* FROM ") + foreignTable + QString(" t1 JOIN ") + ownTable + QString(" t2 ON t2.") + fieldname + QString("=t1.id where t2.id=") + QString::number(self->id());
+    U* item = new U(objectQuery);
+
+    return item->exec();
+}
+
+template<class T>
+template<class U>
+Collection<U>* Table<T>::getForeignCollection()
+{
+    //SELECT t1.* FROM PATIENT t1 JOIN Doctor t2 ON t1.Doctor_id = t2.id
+    QString foreignTable = U::staticMetaObject.className();
+    QString ownTable = T::staticMetaObject.className();
+    QString fieldname = ownTable + QString("_id");
+
+    QString objectQuery = QString("SELECT t1.* FROM ") + foreignTable + QString(" t1 JOIN ") + ownTable + QString(" t2 ON t1.") + fieldname + QString("=t2.id");
+    Collection<U>* item = new Collection<U>(objectQuery);
+
+    item->exec();
+    return item;
+}
 
 template<class T>
 bool Table<T>::create()
@@ -69,10 +117,6 @@ bool Table<T>::create()
 
     QString createQuery = QString("CREATE TABLE ") + name + QString("(");
     QStringList fields;
-
-    //TODO: handle conversion between different sql engines for datatypes
-
-
 
     for(int i = 0;i < T::staticMetaObject.classInfoCount(); i++ )
     {
@@ -111,14 +155,22 @@ T* Table<T>::operator=(T* q)
     return this;
 }
 
+
 template<class T>
 Table<T>::Table()
 {
-    bRecordNew = true;
-    bRecordChanged = false;
+    bRecordChanged = true;
     m_id = 0;
     dataid = 0;
+}
 
+template<class T>
+Table<T>::Table(QString q)
+{
+    bRecordChanged = true;
+    m_id = 0;
+    dataid = 0;
+    query = q;
 }
 
 template<class T>
@@ -187,7 +239,7 @@ bool Table<T>::save()
         qDebug() << s;
         qDebug() << "Success:" << q.exec(s);
         QString idquery = QString("SELECT * FROM ") + T::staticMetaObject.className() + QString(" ORDER BY id DESC LIMIT 1");
-                //QString("SELECT seq FROM sqlite_sequence WHERE name ='") + T::staticMetaObject.className() + QString("'");
+
         q.exec(idquery);
         q.first();
         dataid = q.value(0).toInt();
@@ -204,11 +256,13 @@ bool Table<T>::save()
 template<class T>
 T* Table<T>::exec()
 {
+    if(!bRecordChanged)
+        return (T*)this;
     QSqlRecord rec;
     T* item = (T*)this;
    QSqlQuery q;
-   qDebug() << query;
-   qDebug() << "Succeeded:" << q.exec(query);
+  // qDebug() << query;
+    q.exec(query);
 
    q.first();
    rec = q.record();
@@ -258,53 +312,28 @@ T* Table<T>::doBuild(int count, ... )
 
 
     bool r = true;
-    T* t = new T;
-     t->setProperty("id", 0);
+    T* t = new T();
+    //id eines ungespeicherten objektes ist 0
+    t->setProperty("id", 0);
+
+    //setzte die angegebenen werte
     for(int i = 0;i < count+2; i++ )
         r |= t->setProperty(fields[i].toStdString().c_str(), values[i]);
+
+    //Alle anderen Werte auf 0 setzen.
+    for(int i= count+3;i < T::staticMetaObject.classInfoCount(); i++)
+        r |= t->setProperty(T::staticMetaObject.classInfo(i).name(), 0);
 
     if(!r)
         qDebug() << "error";
 
-
-
-    return t;
+   return t;
 }
 
 template<class T>
 T* Table<T>::doCreate(int count, ... )
 {
-    va_list parameters;
-    va_start(parameters, count);
-    QStringList fields, values;
-    fields << T::staticMetaObject.classInfo(1).name();
-    values << QString("datetime()");
-    fields << T::staticMetaObject.classInfo(2).name();
-    values << QString("datetime()");
-    for(int i = 0;i < count; i++ ){
-        fields << T::staticMetaObject.classInfo(i+3).name();
-        values << QString("'") + QString(va_arg(parameters, char*)) + QString("'");
-    }
-    va_end(parameters);
-    QString insertQuery;
 
-    insertQuery = QString("INSERT INTO ") + T::staticMetaObject.className() + QString("(");
-    insertQuery += fields.join(",");
-    insertQuery += ") values (";
-    insertQuery += values.join(",");
-    insertQuery += ")";
-
-    T* t = (new T(insertQuery))->exec();
-
-    QSqlQuery q;
-    QString idquery = QString("SELECT seq FROM sqlite_sequence WHERE name ='") + T::staticMetaObject.className() + QString("'");
-    q.exec(idquery);
-    q.first();
-    t->dataid = q.value(0).toInt();
-
-   // m_id = getLastID();
-    t->reload();
-    return t;
 }
 
 

@@ -2,6 +2,8 @@
 #define MACROS_H
 
 
+#define QORMModelReferences(table) class table;	<crlf>\
+		QORMDependsOn(table)
 
 #define QOrmModel(table)  \
     class table : public QObject, public Table<table>
@@ -32,14 +34,9 @@
         target* accessor() { return getForeignObject<target>();}                               <crlf>\
         void set##target(target* object){setForeignObject<target>(object);}   
 
-#define QOrmModelHasMany(target)                                                            \
-    Q_PROPERTY(target* target READ target WRITE set##target)                                 <crlf>\
-                                                                                            <crlf>\
+#define QOrmModelHasMany(target, accessors)                                                            \
     public:                                                                                 <crlf>\
-        target* target##Accessor##s() const{ return (target*)m_##target->foreignKeyFor(this);}        <crlf>\
-        void set##target(target* target){bRecordChanged=true; m_##target = target;}                             <crlf>\
-    private:                                                                                <crlf>\
-        target* m_##target;																	<crlf>
+        Collection<target>* accessors() { return getForeignCollection<target>();}        
 
 
 #endif // MACROS_H

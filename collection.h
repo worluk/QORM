@@ -37,11 +37,11 @@ public:
     int length(){return data.size();}
 
     void debugQuery(){ qDebug() << query; }
-
+    bool exec();
 protected:
     QVector<T*> data;
     QString query;
-    bool exec();
+
 
 };
 
@@ -145,7 +145,7 @@ T* Collection<T>::first()
 template<class T>
 T* Collection<T>::last()
 {
-    query += QString(" LIMIT 1 DESC") ;
+    query += QString(" ORDER BY id DESC LIMIT 1 ") ;
     return (new T(query))->exec();
 }
 

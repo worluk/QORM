@@ -1,4 +1,4 @@
-QORMDependsOn(doctor)
+QORMModelReferences(Doctor)
 
 QOrmModel(Patient)
 {
@@ -6,7 +6,5 @@ QOrmModel(Patient)
     QOrmModelField(name, QString, )
 	QOrmModelField(vorname, QString, )
     QOrmModelBelongsTo(Doctor, doctor)
-
-
 };
 

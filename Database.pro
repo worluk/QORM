@@ -20,8 +20,8 @@ HEADERS  += mainwindow.h
 
 FORMS    += mainwindow.ui
 
-TABLES += doctor.h \
-    patient.h
+TABLES += Doctor.h \
+    Patient.h
 
 
 
