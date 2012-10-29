@@ -18,8 +18,13 @@ TablePrepare.variable_out = PRE_HEADERS
 
 QMAKE_EXTRA_COMPILERS += TablePrepare TableBuild TableMocHeader 
 
-SOURCES += qorm.cpp
+SOURCES += QORM/qorm.cpp \
+    QORM/qormtableview.cpp
 
-HEADERS  += qorm.h \
-    table.h \
-    collection.h
+HEADERS  += QORM/qorm.h \
+    QORM/table.h \
+    QORM/collection.h \
+    QORM/qormtableview.h \
+    QORM/qormfield.h
+
+INCLUDEPATH += QORM

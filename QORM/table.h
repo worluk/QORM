@@ -15,10 +15,13 @@
 #include <stdarg.h>
 #include <collection.h>
 
+
 extern QMap<QString, QString> keywords;
 
 #define build(...) doBuild(count_arguments(#__VA_ARGS__), __VA_ARGS__)
 #define generate(...) doCreate (count_arguments(#__VA_ARGS__), __VA_ARGS__)
+
+int count_arguments(QString s);
 
 template<class T>
 class Table
@@ -37,6 +40,7 @@ public:
     void destroy();
 
     static Collection<T>* all(){return (new Collection<T>(QString("SELECT * FROM ") + QString(T::staticMetaObject.className())));}
+    static Collection<T>* all(QList<QORMField> f){return (new Collection<T>(QString("SELECT * FROM ") + QString(T::staticMetaObject.className()), f));}
     static T* doBuild(int count, ... );
     static T* doCreate(int count, ... );
     static bool create();
@@ -49,12 +53,17 @@ public:
 
     bool reload();
 
+
+
+
+
     int dataid;
     int m_id;
     T* exec();
 protected:
 
     QString query;
+
 
     bool bRecordChanged;
 
@@ -237,15 +246,15 @@ bool Table<T>::save()
         s += values.join(",");
         s += ")";
         qDebug() << s;
-        qDebug() << "Success:" << q.exec(s);
+        q.exec(s);
         QString idquery = QString("SELECT * FROM ") + T::staticMetaObject.className() + QString(" ORDER BY id DESC LIMIT 1");
+        QSqlQuery idq(idquery);
 
-        q.exec(idquery);
-        q.first();
-        dataid = q.value(0).toInt();
+        idq.first();
+        dataid = idq.value(0).toInt();
         ((T*)this)->setid(dataid);
-        ((T*)this)->setupdated_at( q.value(2).toDateTime());
-        ((T*)this)->setcreated_at(q.value(1).toDateTime());
+        ((T*)this)->setupdated_at( idq.value(2).toDateTime());
+        ((T*)this)->setcreated_at(idq.value(1).toDateTime());
         //reload();
     }
     query = QString("SELECT * FROM ") + T::staticMetaObject.className() + QString(" WHERE id='") + QString::number(dataid) + QString("'");
@@ -335,6 +344,9 @@ T* Table<T>::doCreate(int count, ... )
 {
 
 }
+
+
+
 
 
 

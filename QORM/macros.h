@@ -1,12 +1,12 @@
 #ifndef MACROS_H
-#define MACROS_H
+#define MACROS_H 
 
 
 #define QORMModelReferences(table) class table;	<crlf>\
-		QORMDependsOn(table)
+QORMDependsOn(table)
 
 #define QOrmModel(table)  \
-    class table : public QObject, public Table<table>
+	class table : public QObject, public Table<table>
 
 #define QOrmOrganizer(table)                                                                \
     Q_OBJECT                                                                                <crlf>\
